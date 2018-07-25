@@ -14,6 +14,11 @@ import (
 	formatter "github.com/x-cray/logrus-prefixed-formatter"
 )
 
+const (
+	LOCAL  = "local"
+	REMOTE = "remote"
+)
+
 func init() {
 	InitLocalLogSystem(WithLogLevel("debug"),
 		WithMaxAge(types.DEFAULT_MAX_AGE),
