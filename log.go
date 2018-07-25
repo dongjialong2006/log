@@ -24,7 +24,7 @@ func init() {
 		WithMaxAge(types.DEFAULT_MAX_AGE),
 		WithRotationCount(types.DEFAULT_ROTATION_COUNT),
 		WithRotationTime(types.DEFAULT_ROTATION_TIME),
-		WithWatchEnable(),
+		WithWatchEnable(true),
 		WithCaller(),
 	)
 

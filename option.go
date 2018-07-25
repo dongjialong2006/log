@@ -29,8 +29,8 @@ func WithContext(ctx context.Context) option {
 	return new(logContext, ctx)
 }
 
-func WithWatchEnable() option {
-	return new(logWatcherEnable, true)
+func WithWatchEnable(enable bool) option {
+	return new(logWatcherEnable, enable)
 }
 
 func WithWatchLogsByNum(num int) option {
