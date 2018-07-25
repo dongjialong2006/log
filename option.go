@@ -5,47 +5,6 @@ import (
 	"time"
 )
 
-type option interface {
-	Get(key string) interface{}
-}
-
-type Option struct {
-	key   string
-	value interface{}
-}
-
-func new(key string, value interface{}) *Option {
-	return &Option{
-		key:   key,
-		value: value,
-	}
-}
-
-func (opt Option) Get(key string) interface{} {
-	if key == opt.key {
-		return opt.value
-	}
-
-	return nil
-}
-
-const (
-	logAge           = "age"
-	logName          = "name"
-	logTime          = "time"
-	logLevel         = "level"
-	logCount         = "count"
-	logFields        = "fields"
-	logContext       = "context"
-	logCaller        = "caller"
-	logTerminal      = "terminal"
-	logRemoteAddr    = "addr"
-	logRemoteProType = "protocol"
-	logWatcherEnable = "enable"
-	logWatcherByNum  = "watcherByNum"
-	logWatcherBySize = "watcherBySize"
-)
-
 func WithLogName(name string) option {
 	return new(logName, name)
 }

@@ -3,6 +3,7 @@ package log
 import (
 	"context"
 	"io/ioutil"
+	"log/types"
 	"os"
 	"path"
 	"sort"
@@ -18,27 +19,6 @@ import (
 var log = New("log")
 var caller bool = false
 var fields map[string]interface{} = nil
-
-type logger struct {
-	url      string
-	protocol string
-}
-
-func (l *logger) Write(p []byte) (n int, err error) {
-	if "" == l.url {
-		return 0, nil
-	}
-
-	if HTTP == l.protocol {
-		_, err = post(l.url, string(p))
-	}
-
-	if HTTPS == l.protocol {
-		_, err = post(l.url, string(p))
-	}
-
-	return
-}
 
 func newWriter(level logrus.Level, writer *rotatelogs.RotateLogs) lfshook.WriterMap {
 	var handles = make(lfshook.WriterMap)
@@ -200,7 +180,7 @@ func findLogName(opts ...option) string {
 		}
 	}
 
-	return DEFAULT_LOG_NAME
+	return types.DEFAULT_LOG_NAME
 }
 
 func findMaxAge(opts ...option) time.Duration {
@@ -214,7 +194,7 @@ func findMaxAge(opts ...option) time.Duration {
 		}
 	}
 
-	return DEFAULT_MAX_AGE
+	return types.DEFAULT_MAX_AGE
 }
 
 func findRotationTime(opts ...option) time.Duration {
@@ -228,7 +208,7 @@ func findRotationTime(opts ...option) time.Duration {
 		}
 	}
 
-	return DEFAULT_ROTATION_TIME
+	return types.DEFAULT_ROTATION_TIME
 }
 
 func findRotationCount(opts ...option) int {
@@ -242,7 +222,7 @@ func findRotationCount(opts ...option) int {
 		}
 	}
 
-	return DEFAULT_ROTATION_COUNT
+	return types.DEFAULT_ROTATION_COUNT
 }
 
 func findWatcherEnable(opts ...option) bool {
@@ -270,7 +250,7 @@ func findWatchLogsByNum(opts ...option) int {
 		}
 	}
 
-	return DEFAULT_WATCHER_FILES_BY_NUM
+	return types.DEFAULT_WATCHER_FILES_BY_NUM
 }
 
 func findWatchLogsBySize(opts ...option) int64 {
@@ -284,7 +264,7 @@ func findWatchLogsBySize(opts ...option) int64 {
 		}
 	}
 
-	return DEFAULT_WATCHER_FILES_BY_SIZE
+	return types.DEFAULT_WATCHER_FILES_BY_SIZE
 }
 
 func findCaller(opts ...option) bool {

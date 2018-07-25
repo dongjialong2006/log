@@ -16,6 +16,6 @@ var _ = Describe("Log", func() {
 	Specify("debug test", func() {
 		model := New("test")
 		Expect(model).ShouldNot(BeNil())
-		model.Debug("dongcf---1----")
+		model.Debug("test")
 	})
 })

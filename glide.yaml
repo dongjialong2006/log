@@ -1,0 +1,15 @@
+package: .
+import:
+- package: agent/types
+- package: github.com/lestrrat/go-file-rotatelogs
+- package: github.com/rifflock/lfshook
+  version: ~2.3.0
+- package: github.com/sirupsen/logrus
+  version: ~1.0.6
+- package: github.com/x-cray/logrus-prefixed-formatter
+  version: ~0.5.2
+testImport:
+- package: github.com/onsi/ginkgo
+  version: ~1.6.0
+- package: github.com/onsi/gomega
+  version: ~1.4.1

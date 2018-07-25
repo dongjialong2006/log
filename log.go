@@ -2,8 +2,12 @@ package log
 
 import (
 	"fmt"
+	"log/entry"
+	"log/file"
+	"log/logger"
+	"log/remote"
+	"log/types"
 	"os"
-	"time"
 
 	"github.com/lestrrat/go-file-rotatelogs"
 	"github.com/rifflock/lfshook"
@@ -11,58 +15,32 @@ import (
 	formatter "github.com/x-cray/logrus-prefixed-formatter"
 )
 
-const (
-	LOCAL  = "local"
-	REMOTE = "remote"
-)
-
-const (
-	DEFAULT_MAX_AGE       = 7 * 24 * time.Hour
-	DEFAULT_ROTATION_TIME = 24 * time.Hour
-)
-
-const (
-	DEFAULT_ROTATION_COUNT        = 6
-	DEFAULT_WATCHER_FILES_BY_NUM  = 6
-	DEFAULT_WATCHER_FILES_BY_SIZE = 10 * 1024 * 1024
-)
-
-const (
-	DEFAULT_LOG_NAME = "./log/default.log"
-)
-
-const (
-	TCP   = "tcp"
-	UDP   = "udp"
-	HTTP  = "http"
-	HTTPS = "https"
-)
-
 func init() {
+	InitLocalLogSystem(WithLogLevel("debug"),
+		WithMaxAge(types.DEFAULT_MAX_AGE),
+		WithRotationCount(types.DEFAULT_ROTATION_COUNT),
+		WithRotationTime(types.DEFAULT_ROTATION_TIME),
+		WithWatchEnable(),
+		WithCaller(),
+	)
+
 	/*
-		InitLocalLogSystem(WithLogLevel("debug"),
-			WithMaxAge(DEFAULT_MAX_AGE),
-			WithRotationCount(DEFAULT_ROTATION_COUNT),
-			WithRotationTime(DEFAULT_ROTATION_TIME),
-			WithWatchEnable(),
+		InitRemoteLogSystem(WithLogLevel("debug"),
 			WithCaller(),
+			WithRemoteAddr("10.95.135.204:23213"),
+			WithRemoteProtocolType(types.TCP),
 		)
 	*/
-	InitRemoteLogSystem(WithLogLevel("debug"),
-		WithCaller(),
-		WithRemoteAddr("10.95.135.204:23213"),
-		WithRemoteProtocolType(TCP),
-	)
 }
 
-func New(name string) *entry {
-	e := &entry{
-		log:    logrus.WithField("model", name),
-		caller: caller,
+func New(name string) *entry.Entry {
+	e := &entry.Entry{
+		Log:    logrus.WithField("model", name),
+		Caller: caller,
 	}
 
 	for key, field := range fields {
-		e.log = e.log.WithField(key, field)
+		e.Log = e.Log.WithField(key, field)
 	}
 
 	return e
@@ -81,7 +59,7 @@ func InitLocalLogSystem(opts ...option) error {
 	}
 
 	path := findLogName(opts...)
-	if err := CreatePath(path); nil != err {
+	if err := file.CreatePath(path); nil != err {
 		return err
 	}
 
@@ -103,7 +81,7 @@ func InitLocalLogSystem(opts ...option) error {
 		go watcher()
 	}
 
-	logrus.SetOutput(&logger{})
+	logrus.SetOutput(&logger.Logger{})
 
 	lfHook := lfshook.NewHook(newWriter(level, writer), &formatter.TextFormatter{
 		TimestampFormat:  "2006-01-02 15:04:05.0000",
@@ -143,7 +121,7 @@ func InitRemoteLogSystem(opts ...option) error {
 
 	logrus.SetLevel(level)
 
-	go handle(ctx, addr, findRemoteProtocolType(opts...))
+	go remote.Handle(ctx, addr, findRemoteProtocolType(opts...))
 
 	return nil
 }
