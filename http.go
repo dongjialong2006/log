@@ -1,4 +1,4 @@
-package http
+package log
 
 import (
 	"crypto/tls"
@@ -30,7 +30,7 @@ func response(code int, value string) (string, error) {
 	return value, nil
 }
 
-func Post(url string, value string) (string, error) {
+func post(url string, value string) (string, error) {
 	if "" == url {
 		return "", fmt.Errorf("url is empty.")
 	}
@@ -63,7 +63,7 @@ func Post(url string, value string) (string, error) {
 	return response(resp.StatusCode, string(data))
 }
 
-func PostWithTLS(url string, value string) (string, error) {
+func postWithTLS(url string, value string) (string, error) {
 	if "" == url {
 		return "", fmt.Errorf("url is empty.")
 	}

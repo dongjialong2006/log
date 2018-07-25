@@ -1,10 +1,8 @@
-package remote
+package log
 
 import (
 	"context"
 	"fmt"
-	"log/logger"
-	"log/types"
 	"math/rand"
 	"net"
 	"time"
@@ -12,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func Handle(ctx context.Context, addr string, protocol string) {
+func handle(ctx context.Context, addr string, protocol string) {
 	var err error = nil
 	var status bool = true
 	var conn net.Conn = nil
@@ -55,16 +53,16 @@ func Handle(ctx context.Context, addr string, protocol string) {
 
 func setOutput(addr string, protocol string) error {
 	switch protocol {
-	case types.TCP, types.UDP:
+	case TCP, UDP:
 		conn, err := dail(addr, protocol)
 		if nil != err {
 			return err
 		}
 		logrus.SetOutput(conn)
-	case types.HTTP, types.HTTPS:
-		logrus.SetOutput(&logger.Logger{
-			Url:     addr,
-			Protocol: protocol,
+	case HTTP, HTTPS:
+		logrus.SetOutput(&output{
+			url:      addr,
+			protocol: protocol,
 		})
 	default:
 		return fmt.Errorf("do not persist protocol type:%s.", protocol)

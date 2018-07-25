@@ -3,7 +3,6 @@ package log
 import (
 	"context"
 	"io/ioutil"
-	"log/types"
 	"os"
 	"path"
 	"sort"
@@ -180,7 +179,7 @@ func findLogName(opts ...option) string {
 		}
 	}
 
-	return types.DEFAULT_LOG_NAME
+	return DEFAULT_LOG_NAME
 }
 
 func findMaxAge(opts ...option) time.Duration {
@@ -194,7 +193,7 @@ func findMaxAge(opts ...option) time.Duration {
 		}
 	}
 
-	return types.DEFAULT_MAX_AGE
+	return DEFAULT_MAX_AGE
 }
 
 func findRotationTime(opts ...option) time.Duration {
@@ -208,7 +207,7 @@ func findRotationTime(opts ...option) time.Duration {
 		}
 	}
 
-	return types.DEFAULT_ROTATION_TIME
+	return DEFAULT_ROTATION_TIME
 }
 
 func findRotationCount(opts ...option) int {
@@ -222,7 +221,7 @@ func findRotationCount(opts ...option) int {
 		}
 	}
 
-	return types.DEFAULT_ROTATION_COUNT
+	return DEFAULT_ROTATION_COUNT
 }
 
 func findWatcherEnable(opts ...option) bool {
@@ -250,7 +249,7 @@ func findWatchLogsByNum(opts ...option) int {
 		}
 	}
 
-	return types.DEFAULT_WATCHER_FILES_BY_NUM
+	return DEFAULT_WATCHER_FILES_BY_NUM
 }
 
 func findWatchLogsBySize(opts ...option) int64 {
@@ -264,7 +263,7 @@ func findWatchLogsBySize(opts ...option) int64 {
 		}
 	}
 
-	return types.DEFAULT_WATCHER_FILES_BY_SIZE
+	return DEFAULT_WATCHER_FILES_BY_SIZE
 }
 
 func findCaller(opts ...option) bool {

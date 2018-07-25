@@ -1,4 +1,4 @@
-package file
+package log
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 
 const filePathEmpty = "file path is empty."
 
-func ReadFile(name string) ([]byte, error) {
+func readFile(name string) ([]byte, error) {
 	if "" == name {
 		return nil, fmt.Errorf(filePathEmpty)
 	}
@@ -22,7 +22,7 @@ func ReadFile(name string) ([]byte, error) {
 	return ioutil.ReadFile(name)
 }
 
-func WriteFile(path string, data []byte) error {
+func writeFile(path string, data []byte) error {
 	if "" == path {
 		return fmt.Errorf("path is empty.")
 	}
@@ -61,7 +61,7 @@ func WriteFile(path string, data []byte) error {
 	return err
 }
 
-func CreatePath(path string) error {
+func createPath(path string) error {
 	if "" == path {
 		return fmt.Errorf(filePathEmpty)
 	}
@@ -83,7 +83,7 @@ func CreatePath(path string) error {
 	return err
 }
 
-func CheckFileExist(path string) (bool, error) {
+func checkFileExist(path string) (bool, error) {
 	if "" == path {
 		return false, fmt.Errorf(filePathEmpty)
 	}
@@ -99,7 +99,7 @@ func CheckFileExist(path string) (bool, error) {
 	return false, err
 }
 
-func DeletePath(path string) error {
+func deletePath(path string) error {
 	if "" == path {
 		return fmt.Errorf(filePathEmpty)
 	}

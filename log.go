@@ -2,10 +2,6 @@ package log
 
 import (
 	"fmt"
-	"log/file"
-	"log/logger"
-	"log/remote"
-	"log/types"
 	"os"
 
 	"github.com/lestrrat/go-file-rotatelogs"
@@ -21,9 +17,9 @@ const (
 
 func init() {
 	InitLocalLogSystem(WithLogLevel("debug"),
-		WithMaxAge(types.DEFAULT_MAX_AGE),
-		WithRotationCount(types.DEFAULT_ROTATION_COUNT),
-		WithRotationTime(types.DEFAULT_ROTATION_TIME),
+		WithMaxAge(DEFAULT_MAX_AGE),
+		WithRotationCount(DEFAULT_ROTATION_COUNT),
+		WithRotationTime(DEFAULT_ROTATION_TIME),
 		WithWatchEnable(true),
 		WithCaller(),
 	)
@@ -32,7 +28,7 @@ func init() {
 		InitRemoteLogSystem(WithLogLevel("debug"),
 			WithCaller(),
 			WithRemoteAddr("10.95.135.204:23213"),
-			WithRemoteProtocolType(types.TCP),
+			WithRemoteProtocolType(TCP),
 		)
 	*/
 }
@@ -63,7 +59,7 @@ func InitLocalLogSystem(opts ...option) error {
 	}
 
 	path := findLogName(opts...)
-	if err := file.CreatePath(path); nil != err {
+	if err := createPath(path); nil != err {
 		return err
 	}
 
@@ -85,7 +81,7 @@ func InitLocalLogSystem(opts ...option) error {
 		go watcher()
 	}
 
-	logrus.SetOutput(&logger.Logger{})
+	logrus.SetOutput(&output{})
 
 	lfHook := lfshook.NewHook(newWriter(level, writer), &formatter.TextFormatter{
 		TimestampFormat:  "2006-01-02 15:04:05.0000",
@@ -125,7 +121,7 @@ func InitRemoteLogSystem(opts ...option) error {
 
 	logrus.SetLevel(level)
 
-	go remote.Handle(ctx, addr, findRemoteProtocolType(opts...))
+	go handle(ctx, addr, findRemoteProtocolType(opts...))
 
 	return nil
 }
