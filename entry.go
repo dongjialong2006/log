@@ -6,7 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type Fileds map[string]interface{}
+type Fields map[string]interface{}
 
 type Entry struct {
 	Caller bool
@@ -140,7 +140,7 @@ func (e Entry) WithField(key string, value interface{}) *Entry {
 	}
 }
 
-func (e Entry) WithFields(fields Fileds) *Entry {
+func (e Entry) WithFields(fields Fields) *Entry {
 	_, file, line, ok := runtime.Caller(1)
 	if !ok || !e.Caller {
 		return &Entry{
