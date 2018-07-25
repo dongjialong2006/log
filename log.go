@@ -16,21 +16,7 @@ const (
 )
 
 func init() {
-	InitLocalLogSystem(WithLogLevel("debug"),
-		WithMaxAge(DEFAULT_MAX_AGE),
-		WithRotationCount(DEFAULT_ROTATION_COUNT),
-		WithRotationTime(DEFAULT_ROTATION_TIME),
-		WithWatchEnable(true),
-		WithCaller(),
-	)
 
-	/*
-		InitRemoteLogSystem(WithLogLevel("debug"),
-			WithCaller(),
-			WithRemoteAddr("10.95.135.204:23213"),
-			WithRemoteProtocolType(TCP),
-		)
-	*/
 }
 
 func New(name string) *Entry {
