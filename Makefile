@@ -28,9 +28,7 @@ clean:
 	$Q rm -rf bin pkg .GOPATH
 
 test: .GOPATH/.ok
-	$Q cd $(GOPATH)/src/$(IMPORT_PATH)/agent; go-bindata -o ./static/static.go -pkg static ./yang/
-	$Q CGO_ENABLED=1;cd $(GOPATH)/src/$(IMPORT_PATH);go test -v -timeout=30m -coverprofile=$(CURDIR)/coverage.out ./... | go-junit-report > $(CURDIR)/report.xml
-	$Q rm -rf $(GOPATH)/src/$(IMPORT_PATH)/agent/static
+	$Q CGO_ENABLED=1;cd $(GOPATH)/src/$(IMPORT_PATH);go test -v -timeout=30m
 	
 Q := $(if $V,,@)
 
