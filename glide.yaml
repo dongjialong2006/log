@@ -1,6 +1,27 @@
-package: .
+package: log
+ignore:
+- log
+- log/logger
+- log/http
+- log/file
+- log/entry
+- log/remote
+- log/types
+
 import:
-- package: agent/types
+- package: golang.org/x/crypto
+  subpackages:
+  - ssh
+- package: golang.org/x/sys
+  subpackages:
+  - unix
+  - windows
+- package: golang.org/x/net
+  subpackages:
+  - html
+- package: golang.org/x/text
+  subpackages:
+  - encoding
 - package: github.com/lestrrat/go-file-rotatelogs
 - package: github.com/rifflock/lfshook
   version: ~2.3.0

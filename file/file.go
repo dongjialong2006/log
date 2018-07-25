@@ -1,16 +1,17 @@
 package file
 
 import (
-	"agent/types"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
 )
 
+const filePathEmpty = "file path is empty."
+
 func ReadFile(name string) ([]byte, error) {
 	if "" == name {
-		return nil, fmt.Errorf(types.ErrParaEmpty)
+		return nil, fmt.Errorf(filePathEmpty)
 	}
 
 	_, err := os.Stat(name)
@@ -23,11 +24,11 @@ func ReadFile(name string) ([]byte, error) {
 
 func WriteFile(path string, data []byte) error {
 	if "" == path {
-		return fmt.Errorf(types.ErrParaEmpty)
+		return fmt.Errorf("path is empty.")
 	}
 
 	if 0 == len(data) {
-		return fmt.Errorf(types.ErrDataLenZero)
+		return fmt.Errorf("data len is zero.")
 	}
 
 	var dir string = ""
@@ -62,7 +63,7 @@ func WriteFile(path string, data []byte) error {
 
 func CreatePath(path string) error {
 	if "" == path {
-		return fmt.Errorf(types.ErrParaEmpty)
+		return fmt.Errorf(filePathEmpty)
 	}
 
 	pos := strings.LastIndex(path, "/")
@@ -84,7 +85,7 @@ func CreatePath(path string) error {
 
 func CheckFileExist(path string) (bool, error) {
 	if "" == path {
-		return false, fmt.Errorf(types.ErrParaEmpty)
+		return false, fmt.Errorf(filePathEmpty)
 	}
 
 	_, err := os.Stat(path)
@@ -100,7 +101,7 @@ func CheckFileExist(path string) (bool, error) {
 
 func DeletePath(path string) error {
 	if "" == path {
-		return fmt.Errorf(types.ErrParaEmpty)
+		return fmt.Errorf(filePathEmpty)
 	}
 
 	tmp := strings.Split(path, "/")

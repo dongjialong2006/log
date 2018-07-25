@@ -1,0 +1,45 @@
+# The import path is where your repository can be found.
+# To import subpackages, always prepend the full import path.
+# If you change this, run `make clean`. Read more: https://git.io/vM7zV
+IMPORT_PATH := log
+
+V := 1 # When V is set, print commands and build progress.
+
+export GOPATH := $(CURDIR)/.GOPATH
+export CGO_ENABLED := 0
+unexport GOBIN
+
+# Space separated patterns of packages to skip in list, test, format.
+IGNORED_PACKAGES := /vendor/
+
+all: agent
+
+agent: .GOPATH/.ok
+	$Q go install -tags netgo $(IMPORT_PATH)/log
+
+update: .GOPATH/.ok
+	$Q glide mirror set https://golang.org/x/crypto https://github.com/golang/crypto
+	$Q glide mirror set https://golang.org/x/text https://github.com/golang/text
+	$Q glide mirror set https://golang.org/x/sys https://github.com/golang/sys
+	$Q glide mirror set https://golang.org/x/net https://github.com/golang/net
+	$Q glide up -v
+	
+clean:
+	$Q rm -rf bin pkg .GOPATH
+
+test: .GOPATH/.ok
+	$Q cd $(GOPATH)/src/$(IMPORT_PATH)/agent; go-bindata -o ./static/static.go -pkg static ./yang/
+	$Q CGO_ENABLED=1;cd $(GOPATH)/src/$(IMPORT_PATH);go test -v -timeout=30m -coverprofile=$(CURDIR)/coverage.out ./... | go-junit-report > $(CURDIR)/report.xml
+	$Q rm -rf $(GOPATH)/src/$(IMPORT_PATH)/agent/static
+	
+Q := $(if $V,,@)
+
+.GOPATH/.ok:
+	$Q rm -rf $(GOPATH)
+	$Q mkdir -p $(GOPATH)/src
+	$Q ln -sf $(CURDIR) $(GOPATH)/src/$(IMPORT_PATH)
+	$Q mkdir -p $(CURDIR)/pkg
+	$Q ln -sf $(CURDIR)/pkg $(GOPATH)/pkg
+	$Q mkdir -p $(CURDIR)/bin
+	$Q ln -sf $(CURDIR)/bin $(GOPATH)/bin
+	$Q touch $@
