@@ -9,151 +9,139 @@ import (
 type Fields map[string]interface{}
 
 type Entry struct {
-	Caller bool
-	Log    *logrus.Entry
+	caller bool
+	log    *logrus.Entry
 }
 
 func (e Entry) Debug(args ...interface{}) {
 	_, file, line, ok := runtime.Caller(1)
-	if !ok || !e.Caller {
-		e.Log.Debug(args...)
+	if !ok || !e.caller {
+		e.log.Debug(args...)
 		return
 	}
 
-	e.Log.WithFields(logrus.Fields{"file": file, "line": line}).Debug(args...)
+	e.log.WithFields(logrus.Fields{"file": file, "line": line}).Debug(args...)
 }
 
 func (e Entry) Debugf(format string, args ...interface{}) {
 	_, file, line, ok := runtime.Caller(1)
-	if !ok || !e.Caller {
-		e.Log.Debugf(format, args...)
+	if !ok || !e.caller {
+		e.log.Debugf(format, args...)
 		return
 	}
-	e.Log.WithFields(logrus.Fields{"file": file, "line": line}).Debugf(format, args...)
+	e.log.WithFields(logrus.Fields{"file": file, "line": line}).Debugf(format, args...)
 }
 
 func (e Entry) Info(args ...interface{}) {
 	_, file, line, ok := runtime.Caller(1)
-	if !ok || !e.Caller {
-		e.Log.Info(args...)
+	if !ok || !e.caller {
+		e.log.Info(args...)
 		return
 	}
-	e.Log.WithFields(logrus.Fields{"file": file, "line": line}).Info(args...)
+	e.log.WithFields(logrus.Fields{"file": file, "line": line}).Info(args...)
 }
 
 func (e Entry) Infof(format string, args ...interface{}) {
 	_, file, line, ok := runtime.Caller(1)
-	if !ok || !e.Caller {
-		e.Log.Infof(format, args...)
+	if !ok || !e.caller {
+		e.log.Infof(format, args...)
 		return
 	}
-	e.Log.WithFields(logrus.Fields{"file": file, "line": line}).Infof(format, args...)
+	e.log.WithFields(logrus.Fields{"file": file, "line": line}).Infof(format, args...)
 }
 
 func (e Entry) Error(args ...interface{}) {
 	_, file, line, ok := runtime.Caller(1)
-	if !ok || !e.Caller {
-		e.Log.Error(args...)
+	if !ok || !e.caller {
+		e.log.Error(args...)
 		return
 	}
-	e.Log.WithFields(logrus.Fields{"file": file, "line": line}).Error(args...)
+	e.log.WithFields(logrus.Fields{"file": file, "line": line}).Error(args...)
 }
 
 func (e Entry) Errorf(format string, args ...interface{}) {
 	_, file, line, ok := runtime.Caller(1)
-	if !ok || !e.Caller {
-		e.Log.Errorf(format, args...)
+	if !ok || !e.caller {
+		e.log.Errorf(format, args...)
 		return
 	}
-	e.Log.WithFields(logrus.Fields{"file": file, "line": line}).Errorf(format, args...)
+	e.log.WithFields(logrus.Fields{"file": file, "line": line}).Errorf(format, args...)
 }
 
 func (e Entry) Warn(args ...interface{}) {
 	_, file, line, ok := runtime.Caller(1)
-	if !ok || !e.Caller {
-		e.Log.Warn(args...)
+	if !ok || !e.caller {
+		e.log.Warn(args...)
 		return
 	}
-	e.Log.WithFields(logrus.Fields{"file": file, "line": line}).Warn(args...)
+	e.log.WithFields(logrus.Fields{"file": file, "line": line}).Warn(args...)
 }
 
 func (e Entry) Warnf(format string, args ...interface{}) {
 	_, file, line, ok := runtime.Caller(1)
-	if !ok || !e.Caller {
-		e.Log.Warnf(format, args...)
+	if !ok || !e.caller {
+		e.log.Warnf(format, args...)
 		return
 	}
-	e.Log.WithFields(logrus.Fields{"file": file, "line": line}).Warnf(format, args...)
+	e.log.WithFields(logrus.Fields{"file": file, "line": line}).Warnf(format, args...)
 }
 
 func (e Entry) Fatal(args ...interface{}) {
 	_, file, line, ok := runtime.Caller(1)
-	if !ok || !e.Caller {
-		e.Log.Fatal(args...)
+	if !ok || !e.caller {
+		e.log.Fatal(args...)
 		return
 	}
-	e.Log.WithFields(logrus.Fields{"file": file, "line": line}).Fatal(args...)
+	e.log.WithFields(logrus.Fields{"file": file, "line": line}).Fatal(args...)
 }
 
 func (e Entry) Fatalf(format string, args ...interface{}) {
 	_, file, line, ok := runtime.Caller(1)
-	if !ok || !e.Caller {
-		e.Log.Fatalf(format, args...)
+	if !ok || !e.caller {
+		e.log.Fatalf(format, args...)
 		return
 	}
 
-	e.Log.WithFields(logrus.Fields{"file": file, "line": line}).Fatalf(format, args...)
+	e.log.WithFields(logrus.Fields{"file": file, "line": line}).Fatalf(format, args...)
 }
 
 func (e Entry) Panic(args ...interface{}) {
 	_, file, line, ok := runtime.Caller(1)
-	if !ok || !e.Caller {
-		e.Log.Panic(args...)
+	if !ok || !e.caller {
+		e.log.Panic(args...)
 		return
 	}
 
-	e.Log.WithFields(logrus.Fields{"file": file, "line": line}).Panic(args...)
+	e.log.WithFields(logrus.Fields{"file": file, "line": line}).Panic(args...)
 }
 
 func (e Entry) Panicf(format string, args ...interface{}) {
 	_, file, line, ok := runtime.Caller(1)
-	if !ok || !e.Caller {
-		e.Log.Panicf(format, args...)
+	if !ok || !e.caller {
+		e.log.Panicf(format, args...)
 		return
 	}
 
-	e.Log.WithFields(logrus.Fields{"file": file, "line": line}).Panicf(format, args...)
+	e.log.WithFields(logrus.Fields{"file": file, "line": line}).Panicf(format, args...)
 }
 
 func (e Entry) WithField(key string, value interface{}) *Entry {
-	_, file, line, ok := runtime.Caller(1)
-	if !ok || !e.Caller {
-		return &Entry{
-			Log:    e.Log.WithField(key, value),
-			Caller: false,
-		}
-	}
-
 	return &Entry{
-		Log:    e.Log.WithFields(logrus.Fields{"file": file, "line": line, key: value}),
-		Caller: true,
+		log:    e.log.WithField(key, value),
+		caller: e.caller,
 	}
 }
 
 func (e Entry) WithFields(fields Fields) *Entry {
-	_, file, line, ok := runtime.Caller(1)
-	if !ok || !e.Caller {
-		return &Entry{
-			Log:    e.Log.WithFields(logrus.Fields(fields)),
-			Caller: false,
-		}
-	}
-
-	fields["file"] = file
-	fields["line"] = line
-
 	return &Entry{
-		Log:    e.Log.WithFields(logrus.Fields(fields)),
-		Caller: true,
+		log:    e.log.WithFields(logrus.Fields(fields)),
+		caller: e.caller,
+	}
+}
+
+func (e Entry) WithError(err error) *Entry {
+	return &Entry{
+		log:    e.log.WithField("error", err),
+		caller: e.caller,
 	}
 }

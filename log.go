@@ -35,12 +35,12 @@ func init() {
 
 func New(name string) *Entry {
 	e := &Entry{
-		Log:    logrus.WithField("model", name),
-		Caller: caller,
+		log:    logrus.WithField("model", name),
+		caller: caller,
 	}
 
 	for key, field := range fields {
-		e.Log = e.Log.WithField(key, field)
+		e.log = e.log.WithField(key, field)
 	}
 
 	return e
