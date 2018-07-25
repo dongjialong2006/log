@@ -2,7 +2,6 @@ package log
 
 import (
 	"fmt"
-	"log/entry"
 	"log/file"
 	"log/logger"
 	"log/remote"
@@ -33,8 +32,8 @@ func init() {
 	*/
 }
 
-func New(name string) *entry.Entry {
-	e := &entry.Entry{
+func New(name string) *Entry {
+	e := &Entry{
 		Log:    logrus.WithField("model", name),
 		Caller: caller,
 	}

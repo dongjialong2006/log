@@ -1,4 +1,4 @@
-package entry
+package log
 
 import (
 	"runtime"
