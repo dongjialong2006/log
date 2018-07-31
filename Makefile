@@ -15,7 +15,7 @@ IGNORED_PACKAGES := /vendor/
 all: agent
 
 agent: .GOPATH/.ok
-	$Q go install -tags netgo $(IMPORT_PATH)/log
+	$Q go install -tags netgo $(IMPORT_PATH)
 
 update: .GOPATH/.ok
 	$Q glide mirror set https://golang.org/x/crypto https://github.com/golang/crypto

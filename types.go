@@ -16,7 +16,17 @@ const (
 )
 
 const (
-	DEFAULT_LOG_NAME = "./log/default.log"
+	DEFAULT_LOG_NAME  = "./log/default.log"
+	DEFAULT_LOG_LEVEL = "debug"
+)
+
+const (
+	LOG_DEBUG_LEVEL = "debug"
+	LOG_INFO_LEVEL  = "info"
+	LOG_ERROR_LEVEL = "error"
+	LOG_FATAL_LEVEL = "fatal"
+	LOG_WARN_LEVEL  = "warn"
+	LOG_PANIC_LEVEL = "panic"
 )
 
 const (
