@@ -40,14 +40,12 @@ func InitLocalLogSystem(opts ...option) error {
 		return terminal(level)
 	}
 
-	path := findLogName(opts...)
-	if err := createPath(path); nil != err {
+	dir := findLogName(opts...)
+	if err := createPath(dir); nil != err {
 		return err
 	}
 
-	fields = findFields(opts...)
-
-	path = fmt.Sprintf("%s_%d", path, os.Getpid())
+	path := fmt.Sprintf("%s_%d", dir, os.Getpid())
 
 	writer, err := rotatelogs.New(
 		path+".%Y_%m_%d",
@@ -59,10 +57,6 @@ func InitLocalLogSystem(opts ...option) error {
 		return err
 	}
 
-	if findWatcherEnable(opts...) {
-		go watcher()
-	}
-
 	logrus.SetOutput(&output{})
 
 	lfHook := lfshook.NewHook(newWriter(level, writer), &formatter.TextFormatter{
@@ -71,6 +65,10 @@ func InitLocalLogSystem(opts ...option) error {
 		QuoteEmptyFields: true,
 		FullTimestamp:    true,
 	})
+
+	if findWatcherEnable(opts...) {
+		go watcher(dir, opts...)
+	}
 
 	logrus.AddHook(lfHook)
 

@@ -74,23 +74,28 @@ func terminal(level logrus.Level) error {
 	return nil
 }
 
-func watcher(opts ...option) {
+func watcher(dir string, opts ...option) {
 	ctx := findContext(opts...)
 	num := findWatchLogsByNum(opts...)
 	size := findWatchLogsBySize(opts...)
-	dir := findLogName(opts...)
 
+	var name string = ""
 	pos := strings.LastIndex(dir, "/")
 	if -1 != pos {
+		name = dir[pos+1:]
 		dir = dir[:pos+1]
 	} else {
+		name = dir
 		dir = "./"
 	}
+
+	log.Debugf("log name:%s, path:%s.", name, dir)
 
 	tick := time.Tick(time.Second)
 	for {
 		select {
 		case <-ctx.Done():
+			log.Warnf("watcher path:%s is closed.", dir)
 			return
 		case <-tick:
 			files, err := ioutil.ReadDir(dir)
@@ -98,28 +103,28 @@ func watcher(opts ...option) {
 				continue
 			}
 
-			var logs = make(map[string]string)
-			var timestamps []string = nil
-
-			tmp := int64(0)
-			for _, f := range files {
-				if f.IsDir() || !strings.Contains(f.Name(), "_") || !strings.Contains(f.Name(), ".") {
-					continue
-				}
-				tmp += f.Size()
-				timestamps = append(timestamps, f.ModTime().String())
-				logs[f.ModTime().String()] = path.Join(dir, f.Name())
-			}
-
-			delBySize(size, num, tmp, timestamps, logs)
-			delByNum(num, timestamps, logs)
+			delBySize(name, size, num, dir, files)
+			delByNum(name, num, dir, files)
 		}
 	}
 
 	return
 }
 
-func delBySize(basic int64, num int, size int64, timestamps []string, logs map[string]string) {
+func delBySize(name string, basic int64, num int, dir string, files []os.FileInfo) {
+	var logs = make(map[string]string)
+	var timestamps []string = nil
+	var size int64 = 0
+
+	for _, f := range files {
+		if f.IsDir() || !strings.Contains(f.Name(), name) {
+			continue
+		}
+		size += f.Size()
+		timestamps = append(timestamps, f.ModTime().String())
+		logs[f.ModTime().String()] = path.Join(dir, f.Name())
+	}
+
 	sort.Strings(timestamps)
 	if size >= basic {
 		for i := 0; i < len(timestamps)-2; i++ {
@@ -132,7 +137,18 @@ func delBySize(basic int64, num int, size int64, timestamps []string, logs map[s
 	}
 }
 
-func delByNum(num int, timestamps []string, logs map[string]string) {
+func delByNum(name string, num int, dir string, files []os.FileInfo) {
+	var logs = make(map[string]string)
+	var timestamps []string = nil
+
+	for _, f := range files {
+		if f.IsDir() || !strings.Contains(f.Name(), name) {
+			continue
+		}
+		timestamps = append(timestamps, f.ModTime().String())
+		logs[f.ModTime().String()] = path.Join(dir, f.Name())
+	}
+
 	sort.Strings(timestamps)
 	for i := 0; i < len(timestamps)-num; i++ {
 		os.Remove(logs[timestamps[i]])
