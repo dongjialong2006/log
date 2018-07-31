@@ -165,7 +165,7 @@ func findTerminal(opts ...option) bool {
 		}
 	}
 
-	return false
+	return true
 }
 
 func findLogName(opts ...option) string {

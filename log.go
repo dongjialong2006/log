@@ -15,17 +15,7 @@ const (
 	REMOTE = "remote"
 )
 
-var once bool = false
-
 func New(name string) *Entry {
-	if !once {
-		InitLocalLogSystem(WithLogLevel(DEFAULT_LOG_LEVEL),
-			WithLogName(DEFAULT_LOG_NAME),
-			WithTerminal(),
-		)
-		once = true
-	}
-
 	e := &Entry{
 		log:    logrus.WithField("model", name),
 		caller: caller,
