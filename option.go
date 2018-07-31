@@ -9,8 +9,8 @@ func WithLogName(name string) option {
 	return new(logName, name)
 }
 
-func WithTerminal() option {
-	return new(logTerminal, true)
+func WithTerminal(out bool) option {
+	return new(logTerminal, out)
 }
 
 func WithRemoteAddr(addr string) option {
