@@ -20,7 +20,10 @@ var _ = Describe("Log", func() {
 		Expect(err).Should(BeNil())
 		model := New("test")
 		Expect(model).ShouldNot(BeNil())
-		model.Error("dongcf----------2222---------")
+		for i := 0; i < 100; i++ {
+			model.Error("dongcf----------2222---------")
+		}
+
 		time.Sleep(time.Second)
 	})
 })

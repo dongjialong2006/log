@@ -100,6 +100,7 @@ func InitRemoteLogSystem(opts ...option) error {
 	})
 
 	logrus.SetLevel(level)
+	logrus.SetOutput(&output{})
 
 	if findFluent(opts...) {
 		return fluent(addr, opts...)
