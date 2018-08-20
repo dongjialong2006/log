@@ -9,6 +9,7 @@ const (
 	logFields        = "fields"
 	logContext       = "context"
 	logCaller        = "caller"
+	logFluent        = "fluent"
 	logTerminal      = "terminal"
 	logRemoteAddr    = "addr"
 	logRemoteProType = "protocol"

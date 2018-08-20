@@ -2,13 +2,16 @@ package log
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/evalphobia/logrus_fluent"
 	"github.com/lestrrat/go-file-rotatelogs"
 	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
@@ -60,6 +63,46 @@ func newWriter(level logrus.Level, writer *rotatelogs.RotateLogs) lfshook.Writer
 	}
 
 	return handles
+}
+
+func fluent(addr string, opts ...option) error {
+	pos := strings.Index(addr, ":")
+	if -1 == pos {
+		return fmt.Errorf("addr format error.")
+	}
+
+	port, err := strconv.Atoi(addr[pos+1:])
+	if nil != err {
+		return err
+	}
+
+	hook, err := logrus_fluent.NewWithConfig(logrus_fluent.Config{
+		Host: addr[:pos],
+		Port: port,
+	})
+	if err != nil {
+		return err
+	}
+
+	hook.SetLevels([]logrus.Level{
+		logrus.PanicLevel,
+		logrus.ErrorLevel,
+		logrus.InfoLevel,
+		logrus.WarnLevel,
+		logrus.DebugLevel,
+		logrus.FatalLevel,
+	})
+
+	name := findLogName(opt...)
+	if "" == name {
+		return fmt.Errorf("tag is empty.")
+	}
+	hook.SetTag(name)
+	hook.AddFilter("error", logrus_fluent.FilterError)
+
+	logrus.AddHook(hook)
+
+	return nil
 }
 
 func terminal(level logrus.Level) error {
@@ -350,4 +393,18 @@ func findRemoteProtocolType(opts ...option) string {
 	}
 
 	return "tcp"
+}
+
+func findFluent(opts ...option) bool {
+	for _, opt := range opts {
+		if nil == opt {
+			continue
+		}
+
+		if value := opt.Get(logFluent); nil != value {
+			return value.(bool)
+		}
+	}
+
+	return false
 }

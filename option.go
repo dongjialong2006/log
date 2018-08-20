@@ -60,3 +60,7 @@ func WithLogLevel(level string) option {
 func WithFields(fields map[string]interface{}) option {
 	return new(logFields, fields)
 }
+
+func WithFluent(value bool) option {
+	return new(logFluent, value)
+}

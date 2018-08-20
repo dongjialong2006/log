@@ -96,10 +96,14 @@ func InitRemoteLogSystem(opts ...option) error {
 	}
 
 	logrus.SetFormatter(&logrus.JSONFormatter{
-		TimestampFormat: "2006-01-02 15:04:05.0000",
+		TimestampFormat: "2006-01-02 15:04:05.00000000",
 	})
 
 	logrus.SetLevel(level)
+
+	if findFluent(opts...) {
+		return fluent(addr, opts...)
+	}
 
 	go handle(ctx, addr, findRemoteProtocolType(opts...))
 
