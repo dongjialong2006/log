@@ -15,13 +15,12 @@ func TestLog(t *testing.T) {
 }
 
 var _ = Describe("Log", func() {
-	err := InitRemoteLogSystem(WithRemoteAddr("172.24.124.212:55505"), WithRemoteProtocolType("tcp"), WithLogLevel("debug"), WithContext(context.Background()), WithTerminal(false))
+	err := InitRemoteLogSystem(WithFluent(true), WithRemoteAddr("log.snc.360es.cn:24224"), WithLogLevel("debug"), WithContext(context.Background()), WithTerminal(false), WithLogName("sslvpn-agent"))
 	Specify("debug test", func() {
-		time.Sleep(time.Second)
 		Expect(err).Should(BeNil())
 		model := New("test")
 		Expect(model).ShouldNot(BeNil())
-		model.WithField("identity", "test").Debug("dongcf----------2222---------")
+		model.Error("dongcf----------2222---------")
 		time.Sleep(time.Second)
 	})
 })

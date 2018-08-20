@@ -97,6 +97,12 @@ func fluent(addr string, opt ...option) error {
 	if "" == name {
 		return fmt.Errorf("tag is empty.")
 	}
+
+	pos = strings.LastIndex(name, "/")
+	if -1 != pos {
+		name = name[pos+1:]
+	}
+
 	hook.SetTag(name)
 	hook.AddFilter("error", logrus_fluent.FilterError)
 
