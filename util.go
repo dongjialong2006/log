@@ -65,7 +65,7 @@ func newWriter(level logrus.Level, writer *rotatelogs.RotateLogs) lfshook.Writer
 	return handles
 }
 
-func fluent(addr string, opts ...option) error {
+func fluent(addr string, opt ...option) error {
 	pos := strings.Index(addr, ":")
 	if -1 == pos {
 		return fmt.Errorf("addr format error.")
