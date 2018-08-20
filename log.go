@@ -60,7 +60,7 @@ func InitLocalLogSystem(opts ...option) error {
 	logrus.SetOutput(&output{})
 
 	lfHook := lfshook.NewHook(newWriter(level, writer), &formatter.TextFormatter{
-		TimestampFormat:  "2006-01-02 15:04:05.0000",
+		TimestampFormat:  "2006-01-02 15:04:05.00000000",
 		ForceColors:      true,
 		QuoteEmptyFields: true,
 		FullTimestamp:    true,

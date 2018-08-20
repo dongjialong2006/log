@@ -10,14 +10,14 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func handle(ctx context.Context, addr string, protocol string) {
-	var err error = nil
-	var status bool = true
-	var conn net.Conn = nil
-	var tick = time.Tick(time.Second)
+var logger = New("log")
 
-	if err = setOutput(addr, protocol); nil != err {
-		fmt.Println(err)
+func handle(ctx context.Context, addr string, protocol string) {
+	var tick = time.Tick(time.Second * 3)
+
+	conn, err := setOutput(addr, protocol)
+	if nil != err {
+		logger.Error(err)
 		return
 	}
 
@@ -26,49 +26,43 @@ func handle(ctx context.Context, addr string, protocol string) {
 		case <-ctx.Done():
 			return
 		case <-tick:
-			if conn, err = dail(addr, protocol); nil != err {
-				fmt.Println(err)
-				if status {
-					status = false
+			if nil == conn {
+				conn, err = setOutput(addr, protocol)
+				if nil != err {
+					logger.Error(err)
+					tick = time.Tick(time.Second * time.Duration(1+rand.Intn(6)))
+					continue
 				}
-				tick = time.Tick(time.Second * time.Duration(1+rand.Intn(6)))
-				continue
-			}
-			if nil != conn {
-				conn.Close()
-				conn = nil
 			}
 
-			if !status {
-				if err = setOutput(addr, protocol); nil != err {
-					fmt.Println(err)
-				} else {
-					status = true
-				}
+			if _, err = conn.Write([]byte("keepalive")); nil != err {
+				logger.Error(err)
+				tick = time.Tick(time.Second * time.Duration(1+rand.Intn(6)))
 			}
 		}
 	}
 	return
 }
 
-func setOutput(addr string, protocol string) error {
+func setOutput(addr string, protocol string) (net.Conn, error) {
 	switch protocol {
 	case TCP, UDP:
 		conn, err := dail(addr, protocol)
 		if nil != err {
-			return err
+			return nil, err
 		}
 		logrus.SetOutput(conn)
+		return conn, nil
 	case HTTP, HTTPS:
 		logrus.SetOutput(&output{
 			url:      addr,
 			protocol: protocol,
 		})
 	default:
-		return fmt.Errorf("do not persist protocol type:%s.", protocol)
+		return nil, fmt.Errorf("do not persist protocol type:%s.", protocol)
 	}
 
-	return nil
+	return nil, nil
 }
 
 func dail(addr string, protocol string) (net.Conn, error) {
