@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/lestrrat/go-file-rotatelogs"
-	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
 	formatter "github.com/x-cray/logrus-prefixed-formatter"
 )
@@ -26,6 +25,18 @@ func New(name string) *Entry {
 	}
 
 	return e
+}
+
+func NewLog(name string, opts ...option) (*Log, error) {
+	log := &Log{
+		log: logrus.New(),
+	}
+
+	if err := log.init(name, opts...); nil != err {
+		return nil, err
+	}
+
+	return log, nil
 }
 
 func InitLocalLogSystem(opts ...option) error {
@@ -57,20 +68,18 @@ func InitLocalLogSystem(opts ...option) error {
 		return err
 	}
 
-	logrus.SetOutput(&output{})
+	if findWatcherEnable(opts...) {
+		go watcher(dir, opts...)
+	}
 
-	lfHook := lfshook.NewHook(newWriter(level, writer), &formatter.TextFormatter{
+	logrus.SetOutput(writer)
+	logrus.SetLevel(level)
+	logrus.SetFormatter(&formatter.TextFormatter{
 		TimestampFormat:  "2006-01-02 15:04:05.00000000",
 		ForceColors:      true,
 		QuoteEmptyFields: true,
 		FullTimestamp:    true,
 	})
-
-	if findWatcherEnable(opts...) {
-		go watcher(dir, opts...)
-	}
-
-	logrus.AddHook(lfHook)
 
 	return nil
 }
