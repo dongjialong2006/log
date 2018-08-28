@@ -65,7 +65,7 @@ func newWriter(level logrus.Level, writer *rotatelogs.RotateLogs) lfshook.Writer
 	return handles
 }
 
-func fluent(addr string, opt ...option) error {
+func fluent(log *logrus.Logger, addr string, opt ...option) error {
 	pos := strings.Index(addr, ":")
 	if -1 == pos {
 		return fmt.Errorf("addr format error.")
@@ -106,7 +106,11 @@ func fluent(addr string, opt ...option) error {
 	hook.SetTag(name)
 	hook.AddFilter("error", logrus_fluent.FilterError)
 
-	logrus.AddHook(hook)
+	if nil == log {
+		logrus.AddHook(hook)
+	} else {
+		log.AddHook(hook)
+	}
 
 	return nil
 }

@@ -12,10 +12,10 @@ import (
 
 var logger = New("log")
 
-func handle(ctx context.Context, addr string, protocol string) {
+func handle(ctx context.Context, log *logrus.Logger, addr string, protocol string) {
 	var tick = time.Tick(time.Second * 3)
 
-	conn, err := setOutput(addr, protocol)
+	conn, err := setOutput(log, addr, protocol)
 	if nil != err {
 		logger.Error(err)
 		return
@@ -27,7 +27,7 @@ func handle(ctx context.Context, addr string, protocol string) {
 			return
 		case <-tick:
 			if nil == conn {
-				conn, err = setOutput(addr, protocol)
+				conn, err = setOutput(log, addr, protocol)
 				if nil != err {
 					logger.Error(err)
 					tick = time.Tick(time.Second * time.Duration(1+rand.Intn(6)))
@@ -45,20 +45,26 @@ func handle(ctx context.Context, addr string, protocol string) {
 	return
 }
 
-func setOutput(addr string, protocol string) (net.Conn, error) {
+func setOutput(log *logrus.Logger, addr string, protocol string) (net.Conn, error) {
 	switch protocol {
 	case TCP, UDP:
 		conn, err := dail(addr, protocol)
 		if nil != err {
 			return nil, err
 		}
-		logrus.SetOutput(conn)
+		if nil == log {
+			logrus.SetOutput(conn)
+		} else {
+			log.Out = conn
+		}
 		return conn, nil
 	case HTTP, HTTPS:
-		logrus.SetOutput(&output{
-			url:      addr,
-			protocol: protocol,
-		})
+		if nil == log {
+			logrus.SetOutput(&output{
+				url:      addr,
+				protocol: protocol,
+			})
+		}
 	default:
 		return nil, fmt.Errorf("do not persist protocol type:%s.", protocol)
 	}

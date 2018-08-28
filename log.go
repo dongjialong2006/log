@@ -32,7 +32,7 @@ func NewLog(name string, opts ...option) (*Log, error) {
 		log: logrus.New(),
 	}
 
-	if err := log.init(name, opts...); nil != err {
+	if err := log.initLocalLog(name, opts...); nil != err {
 		return nil, err
 	}
 
@@ -112,10 +112,10 @@ func InitRemoteLogSystem(opts ...option) error {
 	logrus.SetOutput(&output{})
 
 	if findFluent(opts...) {
-		return fluent(addr, opts...)
+		return fluent(nil, addr, opts...)
 	}
 
-	go handle(ctx, addr, findRemoteProtocolType(opts...))
+	go handle(ctx, nil, addr, findRemoteProtocolType(opts...))
 
 	return nil
 }
