@@ -107,10 +107,15 @@ func (l *Log) initRemoteLog(opts ...option) error {
 	return nil
 }
 
-func (l *Log) output() {
+func (l *Log) NewEntry(name string) *Entry {
+	e := &Entry{
+		log:    l.log.WithField("model", name),
+		caller: caller,
+	}
 
-}
+	for key, field := range fields {
+		e.log = e.log.WithField(key, field)
+	}
 
-func (l *Log) NewEntry(name string) *logrus.Entry {
-	return l.log.WithField("model", name)
+	return e
 }
