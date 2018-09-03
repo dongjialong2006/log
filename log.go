@@ -17,7 +17,7 @@ func New(name string, opts ...option) *Entry {
 	if nil == def {
 		if 0 == len(opts) {
 			opts = append(opts, WithLogLevel("debug"))
-			opts = append(opts, WithLogName("./log/system"))
+			opts = append(opts, WithLogName("./log/system.log"))
 			opts = append(opts, WithWatchEnable(false))
 			opts = append(opts, WithTerminal(false))
 		}
