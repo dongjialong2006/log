@@ -18,9 +18,23 @@ import (
 	formatter "github.com/x-cray/logrus-prefixed-formatter"
 )
 
-var log = New("log")
+var logger = newLog("")
 var caller bool = false
 var fields map[string]interface{} = nil
+
+func newLog(name string) *Entry {
+	def, err := NewLog("", WithLogLevel("debug"),
+		WithLogName("./log/default"),
+		WithWatchEnable(false),
+		WithTerminal(false),
+	)
+	if nil != err {
+		fmt.Println(err)
+		return nil
+	}
+
+	return def.NewEntry(name)
+}
 
 func newWriter(level logrus.Level, writer *rotatelogs.RotateLogs) lfshook.WriterMap {
 	var handles = make(lfshook.WriterMap)
@@ -142,13 +156,13 @@ func watcher(dir string, opts ...option) {
 		dir = "./"
 	}
 
-	log.Debugf("log name:%s, path:%s.", name, dir)
+	logger.Debugf("log name:%s, path:%s.", name, dir)
 
 	tick := time.Tick(time.Second)
 	for {
 		select {
 		case <-ctx.Done():
-			log.Warnf("watcher path:%s is closed.", dir)
+			logger.Warnf("watcher path:%s is closed.", dir)
 			return
 		case <-tick:
 			files, err := ioutil.ReadDir(dir)
@@ -182,7 +196,7 @@ func delBySize(name string, basic int64, num int, dir string, files []os.FileInf
 	if size >= basic {
 		for i := 0; i < len(timestamps)-2; i++ {
 			os.Remove(logs[timestamps[i]])
-			log.Debugf("remove file:%s.", logs[timestamps[i]])
+			logger.Debugf("remove file:%s.", logs[timestamps[i]])
 			if len(timestamps) < num {
 				break
 			}
@@ -205,7 +219,7 @@ func delByNum(name string, num int, dir string, files []os.FileInfo) {
 	sort.Strings(timestamps)
 	for i := 0; i < len(timestamps)-num; i++ {
 		os.Remove(logs[timestamps[i]])
-		log.Debugf("remove file:%s.", logs[timestamps[i]])
+		logger.Debugf("remove file:%s.", logs[timestamps[i]])
 	}
 }
 

@@ -6,15 +6,11 @@ IMPORT_PATH := log
 V := 1 # When V is set, print commands and build progress.
 
 export GOPATH := $(CURDIR)/.GOPATH
-export CGO_ENABLED := 0
 unexport GOBIN
 
-# Space separated patterns of packages to skip in list, test, format.
-IGNORED_PACKAGES := /vendor/
+all: log
 
-all: agent
-
-agent: .GOPATH/.ok
+log: .GOPATH/.ok
 	$Q go install -tags netgo $(IMPORT_PATH)
 
 update: .GOPATH/.ok
@@ -28,7 +24,7 @@ clean:
 	$Q rm -rf bin pkg .GOPATH
 
 test: .GOPATH/.ok
-	$Q CGO_ENABLED=1;cd $(GOPATH)/src/$(IMPORT_PATH);go test -v -timeout=30m
+	$Q cd $(GOPATH)/src/$(IMPORT_PATH);go test -v -timeout=30m
 	
 Q := $(if $V,,@)
 

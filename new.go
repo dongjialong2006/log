@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/lestrrat/go-file-rotatelogs"
-	// "github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
 	formatter "github.com/x-cray/logrus-prefixed-formatter"
 )
@@ -18,10 +17,7 @@ type Log struct {
 func (l *Log) initLocalLog(name string, opts ...option) error {
 	caller = findCaller(opts...)
 
-	level, err := findLevel(opts...)
-	if nil != err {
-		return err
-	}
+	level, _ := findLevel(opts...)
 
 	if findTerminal(opts...) {
 		return terminal(level)

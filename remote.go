@@ -10,14 +10,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var logger = New("log")
-
 func handle(ctx context.Context, log *logrus.Logger, addr string, protocol string) {
 	var tick = time.Tick(time.Second * 3)
 
 	conn, err := setOutput(log, addr, protocol)
 	if nil != err {
-		logger.Error(err)
+		log.Error(err)
 		return
 	}
 
@@ -29,14 +27,14 @@ func handle(ctx context.Context, log *logrus.Logger, addr string, protocol strin
 			if nil == conn {
 				conn, err = setOutput(log, addr, protocol)
 				if nil != err {
-					logger.Error(err)
+					log.Error(err)
 					tick = time.Tick(time.Second * time.Duration(1+rand.Intn(6)))
 					continue
 				}
 			}
 
 			if _, err = conn.Write([]byte("keepalive")); nil != err {
-				logger.Error(err)
+				log.Error(err)
 				tick = time.Tick(time.Second * time.Duration(1+rand.Intn(6)))
 			}
 		}
