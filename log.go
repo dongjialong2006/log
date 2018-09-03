@@ -2,6 +2,7 @@ package log
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/sirupsen/logrus"
 )
@@ -11,9 +12,12 @@ const (
 	REMOTE = "remote"
 )
 
+var rw sync.RWMutex
 var def *Log = nil
 
 func New(name string, opts ...option) *Entry {
+	rw.Lock()
+	defer rw.Unlock()
 	if nil == def {
 		if 0 == len(opts) {
 			opts = append(opts, WithLogLevel("debug"))
