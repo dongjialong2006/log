@@ -43,6 +43,13 @@ func NewLog(name string, opts ...option) (*Log, error) {
 		paths: make(map[string]int),
 	}
 
+	if "" != findRemoteAddr(opts...) {
+		if err := log.initRemoteLog(opts...); nil != err {
+			return nil, err
+		}
+		return log, nil
+	}
+
 	if err := log.initLocalLog(name, opts...); nil != err {
 		return nil, err
 	}
