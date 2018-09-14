@@ -1,7 +1,6 @@
 package log
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -15,13 +14,12 @@ func TestLog(t *testing.T) {
 }
 
 var _ = Describe("Log", func() {
-	err := InitLocalLogSystem(WithLogLevel("debug"), WithContext(context.Background()), WithTerminal(false), WithLogName("sslvpn-agent"))
 	Specify("debug test", func() {
-		Expect(err).Should(BeNil())
-		model := New("test")
-		Expect(model).ShouldNot(BeNil())
-		for i := 0; i < 100; i++ {
-			model.Error("dongcf----------1111---------")
+		log := New("sslvpn-agent", WithLogName("sslvpn-agent"), WithLogLevel("debug"), WithTerminal(false), WithWatchEnable(true))
+		Expect(log).ShouldNot(BeNil())
+
+		for i := 0; i < 10000; i++ {
+			log.Error("dongcf----------1111---------")
 		}
 
 		time.Sleep(time.Second)

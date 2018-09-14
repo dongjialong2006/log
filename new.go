@@ -116,13 +116,15 @@ func (l *Log) initRemoteLog(opts ...option) error {
 }
 
 func (l *Log) watcher(dir string, opts ...option) {
+	pos := strings.LastIndex(dir, "/")
 	ctx := findContext(opts...)
 	num := findWatchLogsByNum(opts...)
 	size := findWatchLogsBySize(opts...)
+	name := dir
 
-	pos := strings.LastIndex(dir, "/")
 	if -1 != pos {
 		dir = dir[:pos+1]
+		name = dir[pos+1:]
 	} else {
 		dir = "./"
 	}
@@ -140,7 +142,7 @@ func (l *Log) watcher(dir string, opts ...option) {
 			}
 
 			l.delBySize(size, files)
-			l.delByNum(num, dir, files)
+			l.delByNum(name, num, dir, files)
 		}
 	}
 
@@ -158,12 +160,12 @@ func (l *Log) delBySize(basic int64, files []os.FileInfo) {
 	}
 }
 
-func (l *Log) delByNum(num int, dir string, files []os.FileInfo) {
+func (l *Log) delByNum(name string, num int, dir string, files []os.FileInfo) {
 	var logs = make(map[string]string)
 	var timestamps []string = nil
 
 	for _, f := range files {
-		if f.IsDir() || !strings.Contains(f.Name(), l.name) {
+		if f.IsDir() || !strings.Contains(f.Name(), name) {
 			continue
 		}
 		timestamps = append(timestamps, f.ModTime().String())
