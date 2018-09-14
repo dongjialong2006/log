@@ -39,8 +39,7 @@ func New(name string, opts ...option) *Entry {
 
 func NewLog(name string, opts ...option) (*Log, error) {
 	log := &Log{
-		log:   logrus.New(),
-		paths: make(map[string]int),
+		log: logrus.New(),
 	}
 
 	if "" != findRemoteAddr(opts...) {

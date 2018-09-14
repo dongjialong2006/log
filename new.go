@@ -7,6 +7,7 @@ import (
 	"path"
 	"sort"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/lestrrat/go-file-rotatelogs"
@@ -16,7 +17,8 @@ import (
 
 type Log struct {
 	log   *logrus.Logger
-	paths map[string]int
+	name  string
+	index int32
 }
 
 func (l *Log) initLocalLog(name string, opts ...option) error {
@@ -57,6 +59,8 @@ func (l *Log) initLocalLog(name string, opts ...option) error {
 		return err
 	}
 
+	writer.Write([]byte(""))
+
 	if findWatcherEnable(opts...) {
 		go l.watcher(dir, opts...)
 	}
@@ -69,6 +73,9 @@ func (l *Log) initLocalLog(name string, opts ...option) error {
 		QuoteEmptyFields: true,
 		FullTimestamp:    true,
 	}
+
+	l.log.Debugf("log system init success.")
+	l.name = writer.CurrentFileName()
 
 	return nil
 }
@@ -113,17 +120,12 @@ func (l *Log) watcher(dir string, opts ...option) {
 	num := findWatchLogsByNum(opts...)
 	size := findWatchLogsBySize(opts...)
 
-	var name string = ""
 	pos := strings.LastIndex(dir, "/")
 	if -1 != pos {
-		name = dir[pos+1:]
 		dir = dir[:pos+1]
 	} else {
-		name = dir
 		dir = "./"
 	}
-
-	l.log.Debugf("log name:%s, path:%s.", name, dir)
 
 	tick := time.Tick(time.Second)
 	for {
@@ -137,62 +139,31 @@ func (l *Log) watcher(dir string, opts ...option) {
 				continue
 			}
 
-			l.delBySize(name, size, num, dir, files)
-			l.delByNum(name, num, dir, files)
+			l.delBySize(size, files)
+			l.delByNum(num, dir, files)
 		}
 	}
 
 	return
 }
 
-func (l *Log) delBySize(name string, basic int64, num int, dir string, files []os.FileInfo) {
-	var logs = make(map[string]string)
-	var timestamps []string = nil
-	var size int64 = 0
-
+func (l *Log) delBySize(basic int64, files []os.FileInfo) {
 	for _, f := range files {
-		if f.IsDir() || !strings.Contains(f.Name(), name) {
+		if f.IsDir() || f.Name() != l.name {
 			continue
 		}
-		size += f.Size()
-		timestamps = append(timestamps, f.ModTime().String())
-		logs[f.ModTime().String()] = path.Join(dir, f.Name())
-	}
-
-	sort.Strings(timestamps)
-	if size >= basic {
-		for i := 0; i < len(timestamps); i++ {
-			if len(timestamps) == 1 {
-				l.replace(logs[timestamps[i]])
-				break
-			}
-			os.Remove(logs[timestamps[i]])
-			l.log.Debugf("remove file:%s.", logs[timestamps[i]])
-			if len(timestamps) < num {
-				break
-			}
+		if f.Size() > basic {
+			os.Rename(l.name, fmt.Sprintf("%s_%d", l.name, atomic.AddInt32(&l.index, 1)))
 		}
 	}
 }
 
-func (l *Log) replace(name string) {
-	num, ok := l.paths[name]
-	if !ok {
-		num = 1
-	} else {
-		num++
-	}
-	l.paths[name] = num
-
-	os.Rename(name, fmt.Sprintf("%s_%d", name, num))
-}
-
-func (l *Log) delByNum(name string, num int, dir string, files []os.FileInfo) {
+func (l *Log) delByNum(num int, dir string, files []os.FileInfo) {
 	var logs = make(map[string]string)
 	var timestamps []string = nil
 
 	for _, f := range files {
-		if f.IsDir() || !strings.Contains(f.Name(), name) {
+		if f.IsDir() || !strings.Contains(f.Name(), l.name) {
 			continue
 		}
 		timestamps = append(timestamps, f.ModTime().String())
