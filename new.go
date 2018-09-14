@@ -74,7 +74,7 @@ func (l *Log) initLocalLog(name string, opts ...option) error {
 		FullTimestamp:    true,
 	}
 
-	l.log.Debugf("log system init success.")
+	l.log.Debugf("log file:%s init success.", dir)
 	l.name = writer.CurrentFileName()
 
 	return nil
