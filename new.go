@@ -141,7 +141,7 @@ func (l *Log) watcher(dir string, opts ...option) {
 				continue
 			}
 
-			l.delBySize(size, files)
+			l.cutLogFile(size, files)
 			l.delByNum(name, num, dir, files)
 		}
 	}
@@ -149,11 +149,12 @@ func (l *Log) watcher(dir string, opts ...option) {
 	return
 }
 
-func (l *Log) delBySize(basic int64, files []os.FileInfo) {
+func (l *Log) cutLogFile(basic int64, files []os.FileInfo) {
 	for _, f := range files {
-		if f.IsDir() || f.Name() != l.name {
+		if f.IsDir() || !strings.HasSuffix(l.name, f.Name()) {
 			continue
 		}
+
 		if f.Size() > basic {
 			os.Rename(l.name, fmt.Sprintf("%s_%d", l.name, atomic.AddInt32(&l.index, 1)))
 		}
