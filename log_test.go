@@ -18,8 +18,8 @@ var _ = Describe("Log", func() {
 		log := New("sslvpn-agent", WithLogName("sslvpn-agent"), WithLogLevel("debug"), WithTerminal(false), WithWatchEnable(true))
 		Expect(log).ShouldNot(BeNil())
 
-		for i := 0; i < 10000; i++ {
-			log.Error("dongcf----------1111---------")
+		for i := 0; i < 1000000; i++ {
+			log.Errorf("dongcf----------%d---------", i)
 		}
 
 		time.Sleep(time.Second)

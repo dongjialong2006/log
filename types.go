@@ -5,7 +5,6 @@ import (
 )
 
 const (
-	DEFAULT_MAX_AGE       = 7 * 24 * time.Hour
 	DEFAULT_ROTATION_TIME = 24 * time.Hour
 )
 

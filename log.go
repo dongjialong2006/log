@@ -2,6 +2,7 @@ package log
 
 import (
 	"fmt"
+	"os"
 	"sync"
 
 	"github.com/sirupsen/logrus"
@@ -14,6 +15,29 @@ const (
 
 var rw sync.RWMutex
 var def *Log = nil
+
+type Log struct {
+	rw     sync.RWMutex
+	log    *logrus.Logger
+	self   bool
+	name   string
+	file   *os.File
+	index  int32
+	source string
+}
+
+func (r *Log) NewEntry(name string) *Entry {
+	e := &Entry{
+		log:    r.log.WithField("model", name),
+		caller: caller,
+	}
+
+	for key, field := range fields {
+		e.log = e.log.WithField(key, field)
+	}
+
+	return e
+}
 
 func New(name string, opts ...option) *Entry {
 	rw.Lock()
@@ -39,17 +63,18 @@ func New(name string, opts ...option) *Entry {
 
 func NewLog(name string, opts ...option) (*Log, error) {
 	log := &Log{
-		log: logrus.New(),
+		log:  logrus.New(),
+		file: nil,
 	}
 
 	if "" != findRemoteAddr(opts...) {
-		if err := log.initRemoteLog(opts...); nil != err {
+		if err := log.initRemoteLogSystem(opts...); nil != err {
 			return nil, err
 		}
 		return log, nil
 	}
 
-	if err := log.initLocalLog(name, opts...); nil != err {
+	if err := log.initLocalLogSystem(name, opts...); nil != err {
 		return nil, err
 	}
 

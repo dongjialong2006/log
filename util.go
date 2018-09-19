@@ -123,18 +123,19 @@ func terminal(level logrus.Level) error {
 	return nil
 }
 
-func findLevel(opts ...option) (logrus.Level, error) {
+func findLevel(opts ...option) logrus.Level {
 	for _, opt := range opts {
 		if nil == opt {
 			continue
 		}
 
 		if value := opt.Get(logLevel); nil != value {
-			return logrus.ParseLevel(value.(string))
+			level, _ := logrus.ParseLevel(value.(string))
+			return level
 		}
 	}
 
-	return logrus.InfoLevel, nil
+	return logrus.InfoLevel
 }
 
 func findTerminal(opts ...option) bool {
@@ -163,20 +164,6 @@ func findLogName(opts ...option) string {
 	}
 
 	return DEFAULT_LOG_NAME
-}
-
-func findMaxAge(opts ...option) time.Duration {
-	for _, opt := range opts {
-		if nil == opt {
-			continue
-		}
-
-		if value := opt.Get(logAge); nil != value {
-			return value.(time.Duration)
-		}
-	}
-
-	return DEFAULT_MAX_AGE
 }
 
 func findRotationTime(opts ...option) time.Duration {
