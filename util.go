@@ -9,57 +9,12 @@ import (
 	"time"
 
 	"github.com/evalphobia/logrus_fluent"
-	"github.com/lestrrat/go-file-rotatelogs"
-	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
 	formatter "github.com/x-cray/logrus-prefixed-formatter"
 )
 
 var caller bool = false
 var fields map[string]interface{} = nil
-
-func newWriter(level logrus.Level, writer *rotatelogs.RotateLogs) lfshook.WriterMap {
-	var handles = make(lfshook.WriterMap)
-	switch level {
-	case 0:
-		logrus.SetLevel(logrus.PanicLevel)
-		handles[logrus.PanicLevel] = writer
-	case 1:
-		logrus.SetLevel(logrus.FatalLevel)
-		handles[logrus.PanicLevel] = writer
-		handles[logrus.FatalLevel] = writer
-	case 2:
-		logrus.SetLevel(logrus.ErrorLevel)
-		handles[logrus.PanicLevel] = writer
-		handles[logrus.FatalLevel] = writer
-		handles[logrus.ErrorLevel] = writer
-	case 3:
-		logrus.SetLevel(logrus.WarnLevel)
-		handles[logrus.PanicLevel] = writer
-		handles[logrus.FatalLevel] = writer
-		handles[logrus.ErrorLevel] = writer
-		handles[logrus.WarnLevel] = writer
-	case 4:
-		logrus.SetLevel(logrus.InfoLevel)
-		handles[logrus.PanicLevel] = writer
-		handles[logrus.FatalLevel] = writer
-		handles[logrus.ErrorLevel] = writer
-		handles[logrus.WarnLevel] = writer
-		handles[logrus.InfoLevel] = writer
-	case 5:
-		logrus.SetLevel(logrus.DebugLevel)
-		handles[logrus.PanicLevel] = writer
-		handles[logrus.FatalLevel] = writer
-		handles[logrus.ErrorLevel] = writer
-		handles[logrus.WarnLevel] = writer
-		handles[logrus.InfoLevel] = writer
-		handles[logrus.DebugLevel] = writer
-	default:
-		return nil
-	}
-
-	return handles
-}
 
 func fluent(log *logrus.Logger, addr string, opt ...option) error {
 	pos := strings.Index(addr, ":")
