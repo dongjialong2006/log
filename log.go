@@ -2,7 +2,6 @@ package log
 
 import (
 	"fmt"
-	"os"
 	"sync"
 
 	"github.com/sirupsen/logrus"
@@ -14,23 +13,34 @@ const (
 )
 
 var rw sync.RWMutex
+
 var def *Log = nil
+var opt []option = nil
+
+func init() {
+	opt = append(opt, WithLogLevel("debug"))
+	opt = append(opt, WithLogName("./log/system.log"))
+	opt = append(opt, WithWatchEnable(false))
+	opt = append(opt, WithTerminal(false))
+}
 
 type Log struct {
 	rw     sync.RWMutex
 	log    *logrus.Logger
 	self   bool
 	name   string
-	file   *os.File
+	file   *output
 	index  int32
 	source string
 }
 
 func (r *Log) NewEntry(name string) *Entry {
+	r.rw.RLock()
 	e := &Entry{
 		log:    r.log.WithField("model", name),
 		caller: caller,
 	}
+	r.rw.RUnlock()
 
 	for key, field := range fields {
 		e.log = e.log.WithField(key, field)
@@ -43,13 +53,6 @@ func New(name string, opts ...option) *Entry {
 	rw.Lock()
 	defer rw.Unlock()
 	if nil == def {
-		if 0 == len(opts) {
-			opts = append(opts, WithLogLevel("debug"))
-			opts = append(opts, WithLogName("./log/system.log"))
-			opts = append(opts, WithWatchEnable(false))
-			opts = append(opts, WithTerminal(false))
-		}
-
 		var err error = nil
 		def, err = NewLog("", opts...)
 		if nil != err {
@@ -65,6 +68,10 @@ func NewLog(name string, opts ...option) (*Log, error) {
 	log := &Log{
 		log:  logrus.New(),
 		file: nil,
+	}
+
+	if 0 == len(opts) {
+		opts = opt
 	}
 
 	if "" != findRemoteAddr(opts...) {

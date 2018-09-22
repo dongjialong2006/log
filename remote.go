@@ -59,8 +59,8 @@ func setOutput(log *logrus.Logger, addr string, protocol string) (net.Conn, erro
 	case HTTP, HTTPS:
 		if nil == log {
 			logrus.SetOutput(&output{
-				url:      addr,
-				protocol: protocol,
+				URL:  addr,
+				Type: protocol,
 			})
 		}
 	default:

@@ -41,7 +41,6 @@ func (l *Log) logFileName() (string, error) {
 }
 
 func (l *Log) initLogrusLog(level logrus.Level) error {
-	l.log.Out = l.file
 	l.log.SetLevel(level)
 	l.log.Formatter = &formatter.TextFormatter{
 		TimestampFormat:  "2006-01-02 15:04:05.00000000",
@@ -68,7 +67,7 @@ func (l *Log) initLocalLogSystem(name string, opts ...option) error {
 		l.source = findLogName(opts...)
 	}
 
-	if err := l.openFile(); err != nil {
+	if err := l.hook(); err != nil {
 		return err
 	}
 
@@ -79,27 +78,30 @@ func (l *Log) initLocalLogSystem(name string, opts ...option) error {
 	return l.initLogrusLog(level)
 }
 
-func (l *Log) openFile() error {
-	var err error = nil
-	if l.name, err = l.logFileName(); nil != err {
-		return err
-	}
-
-	if l.checkFileExist() {
-		return nil
-	}
-
-	file, err := os.OpenFile(l.name, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+func (l *Log) hook() error {
+	name, err := l.logFileName()
 	if nil != err {
 		return err
 	}
 
-	l.log.Out = file
-
-	if nil != l.file {
-		l.close()
+	if l.checkFileExist(name) {
+		return nil
 	}
+
+	file, err := newOutput(name, "", "")
+	if nil != err {
+		return err
+	}
+
+	l.log.SetOutput(file)
+
+	l.rw.Lock()
+	if name != l.name {
+		l.name = name
+	}
+	l.close()
 	l.file = file
+	l.rw.Unlock()
 
 	return nil
 }
@@ -136,7 +138,6 @@ func (l *Log) initRemoteLogSystem(opts ...option) error {
 }
 
 func (l *Log) watch(opts ...option) {
-	ctx := findContext(opts...)
 	num := findWatchLogsByNum(opts...)
 	size := findWatchLogsBySize(opts...)
 
@@ -152,23 +153,17 @@ func (l *Log) watch(opts ...option) {
 
 	tick := time.Tick(time.Second)
 	for {
-		select {
-		case <-ctx.Done():
-			l.log.Warnf("log watcher path:%s is closed.", path)
-			return
+		<-tick
+		files, err := ioutil.ReadDir(path)
+		if err != nil {
+			continue
+		}
 
-		case <-tick:
-			files, err := ioutil.ReadDir(path)
-			if err != nil {
-				continue
-			}
+		l.delLogFileByNum(name, path, num, files)
+		l.cutLogFileBySize(size, files)
 
-			l.delLogFileByNum(name, path, num, files)
-			l.cutLogFileBySize(size, files)
-
-			if err = l.openFile(); nil != err {
-				l.log.Error(err)
-			}
+		if err = l.hook(); nil != err {
+			l.log.Error(err)
 		}
 	}
 
@@ -197,8 +192,8 @@ func (l *Log) newFileDir(path string) error {
 	return err
 }
 
-func (l *Log) checkFileExist() bool {
-	_, err := os.Stat(l.name)
+func (l *Log) checkFileExist(name string) bool {
+	_, err := os.Stat(name)
 	if err == nil {
 		return true
 	}
