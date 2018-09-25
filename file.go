@@ -40,7 +40,7 @@ func (l *Log) initLocalLogSystem(name string, opts ...option) error {
 		return terminal(level)
 	}
 
-	if err := l.defPath(name, level); err != nil {
+	if err := l.defPath(name, level, opts...); err != nil {
 		return err
 	}
 

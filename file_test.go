@@ -12,7 +12,6 @@ func TestNew(t *testing.T) {
 	RunSpecs(t, "New Suite")
 }
 
-/*
 var _ = Describe("New", func() {
 	log1, err := NewLog("", WithLogLevel("debug"), WithTerminal(false), WithLogName("sslvpn-agent1"))
 	log2, err := NewLog("sslvpn-agent2", WithLogLevel("debug"), WithTerminal(false), WithLogName("sslvpn-agent2"))
@@ -33,4 +32,3 @@ var _ = Describe("New", func() {
 		time.Sleep(time.Second)
 	})
 })
-*/
