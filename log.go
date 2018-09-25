@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
 )
 
@@ -25,22 +26,20 @@ func init() {
 }
 
 type Log struct {
-	rw     sync.RWMutex
-	log    *logrus.Logger
-	self   bool
-	name   string
-	file   *output
-	index  int32
-	source string
+	log   *logrus.Logger
+	self  bool
+	path  string
+	name  string
+	hook  *lfshook.LfsHook
+	index int32
+	formt string
 }
 
 func (r *Log) NewEntry(name string) *Entry {
-	r.rw.RLock()
 	e := &Entry{
 		log:    r.log.WithField("model", name),
 		caller: caller,
 	}
-	r.rw.RUnlock()
 
 	for key, field := range fields {
 		e.log = e.log.WithField(key, field)
@@ -66,8 +65,7 @@ func New(name string, opts ...option) *Entry {
 
 func NewLog(name string, opts ...option) (*Log, error) {
 	log := &Log{
-		log:  logrus.New(),
-		file: nil,
+		log: logrus.New(),
 	}
 
 	if 0 == len(opts) {

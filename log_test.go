@@ -2,7 +2,6 @@ package log
 
 import (
 	"testing"
-	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -18,10 +17,8 @@ var _ = Describe("Log", func() {
 		log := New("sslvpn-agent", WithLogName("sslvpn-agent"), WithLogLevel("debug"), WithTerminal(false), WithWatchEnable(true))
 		Expect(log).ShouldNot(BeNil())
 
-		for i := 0; i < 1000000; i++ {
+		for i := 0; i < 1000; i++ {
 			log.Errorf("dongcf----------%d---------", i)
 		}
-
-		time.Sleep(time.Second)
 	})
 })

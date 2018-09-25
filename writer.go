@@ -20,7 +20,8 @@ func newOutput(name string, url, stype string) (*output, error) {
 			File: nil,
 		}, nil
 	}
-	file, err := os.OpenFile(name, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+
+	file, err := os.OpenFile(name, os.O_CREATE|os.O_APPEND|os.O_WRONLY|os.O_SYNC, 0644)
 	if nil != err {
 		return nil, err
 	}
@@ -40,9 +41,10 @@ func (l *output) Close() {
 	l.Unlock()
 }
 
-func (l *output) Write(p []byte) (n int, err error) {
+func (l output) Write(p []byte) (n int, err error) {
 	l.RLock()
 	defer l.RUnlock()
+
 	if nil != l.File {
 		n, err = l.File.Write(p)
 		return

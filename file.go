@@ -5,51 +5,31 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"sort"
 	"strings"
 	"sync/atomic"
 	"time"
 
+	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
 	formatter "github.com/x-cray/logrus-prefixed-formatter"
 )
 
 const filePathEmpty = "file path is empty."
 
-func (l *Log) close() {
-	if nil != l.file {
-		l.file.Close()
-	}
-}
-
-func (l *Log) logFileName() (string, error) {
+func (l *Log) logFileName() string {
 	if !l.self {
-		name := l.source
-		if err := l.newFileDir(name); nil != err {
-			return "", err
-		}
 		year, month, day := time.Now().Date()
-		return fmt.Sprintf("%s_%d.%d_%02d_%02d", name, os.Getpid(), year, month, day), nil
+		return fmt.Sprintf("%s_%d.%d_%02d_%02d", l.formt, os.Getpid(), year, month, day)
 	}
 
-	pos := strings.LastIndex(l.source, "/")
+	pos := strings.LastIndex(l.formt, "/")
 	if -1 == pos {
-		return fmt.Sprintf("./%s", l.source), nil
+		return fmt.Sprintf("./%s", l.formt)
 	}
 
-	return l.source, nil
-}
-
-func (l *Log) initLogrusLog(level logrus.Level) error {
-	l.log.SetLevel(level)
-	l.log.Formatter = &formatter.TextFormatter{
-		TimestampFormat:  "2006-01-02 15:04:05.00000000",
-		ForceColors:      true,
-		QuoteEmptyFields: true,
-		FullTimestamp:    true,
-	}
-
-	return nil
+	return l.formt
 }
 
 func (l *Log) initLocalLogSystem(name string, opts ...option) error {
@@ -60,14 +40,7 @@ func (l *Log) initLocalLogSystem(name string, opts ...option) error {
 		return terminal(level)
 	}
 
-	if "" != name {
-		l.self = true
-		l.source = name
-	} else {
-		l.source = findLogName(opts...)
-	}
-
-	if err := l.hook(); err != nil {
+	if err := l.defPath(name, level); err != nil {
 		return err
 	}
 
@@ -75,34 +48,37 @@ func (l *Log) initLocalLogSystem(name string, opts ...option) error {
 		go l.watch(opts...)
 	}
 
-	return l.initLogrusLog(level)
+	return nil
 }
 
-func (l *Log) hook() error {
-	name, err := l.logFileName()
+func (l *Log) defPath(name string, level logrus.Level, opts ...option) error {
+	if "" != name {
+		l.self = true
+		l.formt = name
+	} else {
+		l.formt = findLogName(opts...)
+	}
+
+	name = l.logFileName()
+	l.name = filepath.Base(name)
+
+	l.path = filepath.Dir(name)
+
+	l.hook = lfshook.NewHook(name, &formatter.TextFormatter{
+		TimestampFormat:  "2006-01-02 15:04:05.0000",
+		ForceColors:      true,
+		QuoteEmptyFields: true,
+		FullTimestamp:    true,
+	})
+
+	out, err := newOutput("", "", "")
 	if nil != err {
 		return err
 	}
 
-	if l.checkFileExist(name) {
-		return nil
-	}
-
-	file, err := newOutput(name, "", "")
-	if nil != err {
-		return err
-	}
-
-	l.log.SetOutput(file)
-
-	l.rw.Lock()
-	if name != l.name {
-		l.name = name
-	}
-	l.close()
-	l.file = file
-	l.rw.Unlock()
-
+	l.log.SetOutput(out)
+	l.log.AddHook(l.hook)
+	l.log.SetLevel(level)
 	return nil
 }
 
@@ -141,80 +117,37 @@ func (l *Log) watch(opts ...option) {
 	num := findWatchLogsByNum(opts...)
 	size := findWatchLogsBySize(opts...)
 
-	var name string = l.name
-	var path string = "./"
-
-	pos := strings.LastIndex(l.name, "/")
-	if -1 != pos {
-		path = l.name[:pos+1]
-		name = l.name[pos+1:]
-	}
-	defer l.close()
-
-	tick := time.Tick(time.Second)
+	var name string = ""
+	tick := time.Tick(time.Millisecond * 100)
 	for {
 		<-tick
-		files, err := ioutil.ReadDir(path)
+		files, err := ioutil.ReadDir(l.path)
 		if err != nil {
 			continue
 		}
 
-		l.delLogFileByNum(name, path, num, files)
+		l.delLogFileByNum(l.name, l.path, num, files)
 		l.cutLogFileBySize(size, files)
 
-		if err = l.hook(); nil != err {
-			l.log.Error(err)
+		name = filepath.Base(l.logFileName())
+		if l.name != name {
+			l.name = name
+			l.hook.SetDefaultPath(fmt.Sprintf("%s/%s", l.path, l.name))
 		}
 	}
 
 	return
 }
 
-func (l *Log) newFileDir(path string) error {
-	if "" == path {
-		return fmt.Errorf(filePathEmpty)
-	}
-
-	pos := strings.LastIndex(path, "/")
-	if -1 == pos {
-		return nil
-	}
-	path = path[:pos]
-	_, err := os.Stat(path)
-	if nil == err {
-		return nil
-	}
-
-	if os.IsNotExist(err) {
-		err = os.MkdirAll(path, os.ModePerm)
-	}
-
-	return err
-}
-
-func (l *Log) checkFileExist(name string) bool {
-	_, err := os.Stat(name)
-	if err == nil {
-		return true
-	}
-
-	if os.IsNotExist(err) {
-		return false
-	}
-
-	l.log.Error(err)
-
-	return false
-}
-
 func (l *Log) cutLogFileBySize(basic int64, files []os.FileInfo) {
 	for _, f := range files {
-		if f.IsDir() || !strings.HasSuffix(l.name, f.Name()) {
+		if f.IsDir() || l.name != f.Name() {
 			continue
 		}
 
 		if f.Size() > basic {
-			os.Rename(l.name, fmt.Sprintf("%s_%d", l.name, atomic.AddInt32(&l.index, 1)))
+			name := fmt.Sprintf("%s/%s", l.path, l.name)
+			os.Rename(name, fmt.Sprintf("%s_%d", name, atomic.AddInt32(&l.index, 1)))
 			break
 		}
 	}
