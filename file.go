@@ -126,7 +126,7 @@ func (l *Log) watch(opts ...option) {
 			continue
 		}
 
-		l.delLogFileByNum(l.name, l.path, num, files)
+		l.delLogFileByNum(num, files)
 		l.cutLogFileBySize(size, files)
 
 		name = filepath.Base(l.logFileName())
@@ -155,17 +155,17 @@ func (l *Log) cutLogFileBySize(basic int64, files []os.FileInfo) {
 	return
 }
 
-func (l *Log) delLogFileByNum(name string, dir string, num int, files []os.FileInfo) {
+func (l *Log) delLogFileByNum(num int, files []os.FileInfo) {
 	var logs = make(map[string]string)
 	var timestamps []string = nil
 
 	for _, f := range files {
-		if f.IsDir() || !strings.Contains(f.Name(), name) {
+		if f.IsDir() || !strings.Contains(f.Name(), l.formt) {
 			continue
 		}
 
 		timestamps = append(timestamps, f.ModTime().String())
-		logs[f.ModTime().String()] = path.Join(dir, f.Name())
+		logs[f.ModTime().String()] = path.Join(l.path, f.Name())
 	}
 
 	sort.Strings(timestamps)
