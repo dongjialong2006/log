@@ -127,7 +127,7 @@ func (l *Log) watch(opts ...option) {
 		}
 
 		l.delLogFileByNum(num, files)
-		l.cutLogFileBySize(size, files)
+		l.cutLogFileBySize(num, size, files)
 
 		name = filepath.Base(l.logFileName())
 		if l.name != name {
@@ -139,15 +139,15 @@ func (l *Log) watch(opts ...option) {
 	return
 }
 
-func (l *Log) cutLogFileBySize(basic int64, files []os.FileInfo) {
+func (l *Log) cutLogFileBySize(num int, basic int64, files []os.FileInfo) {
 	for _, f := range files {
 		if f.IsDir() || l.name != f.Name() {
 			continue
 		}
 
-		if f.Size() > basic {
+		if f.Size() > (basic / int64(num)) {
 			name := fmt.Sprintf("%s/%s", l.path, l.name)
-			os.Rename(name, fmt.Sprintf("%s_%d", name, atomic.AddInt32(&l.index, 1)))
+			os.Rename(name, fmt.Sprintf("%s_%02d", name, atomic.AddInt32(&l.index, 1)))
 			break
 		}
 	}
@@ -160,7 +160,7 @@ func (l *Log) delLogFileByNum(num int, files []os.FileInfo) {
 	var timestamps []string = nil
 
 	for _, f := range files {
-		if f.IsDir() || !strings.Contains(f.Name(), l.formt) {
+		if f.IsDir() || !strings.HasPrefix(f.Name(), l.formt) {
 			continue
 		}
 
