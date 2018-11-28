@@ -120,19 +120,23 @@ func (l *Log) watch(opts ...option) {
 	var name string = ""
 	tick := time.Tick(time.Millisecond * 100)
 	for {
-		<-tick
-		files, err := ioutil.ReadDir(l.path)
-		if err != nil {
-			continue
-		}
+		select {
+		case <-tick:
+			files, err := ioutil.ReadDir(l.path)
+			if err != nil {
+				continue
+			}
 
-		l.delLogFileByNum(num, files)
-		l.cutLogFileBySize(num, size, files)
+			l.delLogFileByNum(num, files)
+			l.cutLogFileBySize(num, size, files)
 
-		name = filepath.Base(l.logFileName())
-		if l.name != name {
-			l.name = name
-			l.hook.SetDefaultPath(fmt.Sprintf("%s/%s", l.path, l.name))
+			name = filepath.Base(l.logFileName())
+			if l.name != name {
+				l.name = name
+				l.hook.SetDefaultPath(fmt.Sprintf("%s/%s", l.path, l.name))
+			}
+		case <-l.stop:
+			return
 		}
 	}
 

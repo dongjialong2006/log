@@ -30,14 +30,15 @@ type Log struct {
 	self  bool
 	path  string
 	name  string
+	stop  chan struct{}
 	hook  *lfshook.LfsHook
 	index int32
 	formt string
 }
 
-func (r *Log) NewEntry(name string) *Entry {
+func (l *Log) NewEntry(name string) *Entry {
 	e := &Entry{
-		log:    r.log.WithField("model", name),
+		log:    l.log.WithField("model", name),
 		caller: caller,
 	}
 
@@ -46,6 +47,13 @@ func (r *Log) NewEntry(name string) *Entry {
 	}
 
 	return e
+}
+
+func (l *Log) Stop() {
+	if nil != l.stop {
+		close(l.stop)
+		l.stop = nil
+	}
 }
 
 func New(name string, opts ...option) *Entry {
@@ -65,7 +73,8 @@ func New(name string, opts ...option) *Entry {
 
 func NewLog(name string, opts ...option) (*Log, error) {
 	log := &Log{
-		log: logrus.New(),
+		log:  logrus.New(),
+		stop: make(chan struct{}),
 	}
 
 	if 0 == len(opts) {
