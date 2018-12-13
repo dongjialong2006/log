@@ -118,7 +118,7 @@ func (l *Log) watch(opts ...option) {
 	size := findWatchLogsBySize(opts...)
 
 	var name string = ""
-	tick := time.Tick(time.Millisecond * 100)
+	tick := time.Tick(time.Millisecond * 500)
 	for {
 		select {
 		case <-tick:
@@ -133,6 +133,7 @@ func (l *Log) watch(opts ...option) {
 			name = filepath.Base(l.logFileName())
 			if l.name != name {
 				l.name = name
+				atomic.StoreInt32(&l.index, 0)
 				l.hook.SetDefaultPath(fmt.Sprintf("%s/%s", l.path, l.name))
 			}
 		case <-l.stop:
