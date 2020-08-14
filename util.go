@@ -90,7 +90,7 @@ func findLevel(opts ...option) logrus.Level {
 		}
 	}
 
-	return logrus.DebugLevel
+	return logrus.InfoLevel
 }
 
 func findTerminal(opts ...option) bool {
