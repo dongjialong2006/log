@@ -37,9 +37,8 @@ func (l *Log) initLocalLogSystem(name string, opts ...option) error {
 	caller = findCaller(opts...)
 
 	if findTerminal(opts...) {
-		terminal(level)
-		l.log = logrus.New()
-		return nil
+		l.log = logrus.StandardLogger()
+		return terminal(level)
 	}
 
 	if err := l.defPath(name, level, opts...); err != nil {
