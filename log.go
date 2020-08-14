@@ -50,15 +50,21 @@ func (l *Log) NewEntry(name string) *Entry {
 }
 
 func (l *Log) Stop() {
-	if nil != l.stop {
+	if nil == l.stop {
+		return
+	}
+
+	select {
+	case <-l.stop:
+	default:
 		close(l.stop)
-		l.stop = nil
 	}
 }
 
 func New(name string, opts ...option) *Entry {
 	rw.Lock()
 	defer rw.Unlock()
+
 	if nil == def {
 		var err error = nil
 		def, err = NewLog("", opts...)
