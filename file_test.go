@@ -16,7 +16,7 @@ func TestNew(t *testing.T) {
 var _ = Describe("New", func() {
 	log1, err := NewLog("", WithLogLevel("debug"), WithTerminal(false), WithLogName("sslvpn-agent1"))
 	log2, err := NewLog("sslvpn-agent2", WithLogLevel("debug"), WithTerminal(false), WithLogName("sslvpn-agent2"))
-	Specify("debug test", func() {
+	Specify("new", func() {
 		Expect(err).Should(BeNil())
 		model := log1.NewEntry("dcf")
 		Expect(model).ShouldNot(BeNil())

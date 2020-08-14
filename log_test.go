@@ -13,7 +13,7 @@ func TestLog(t *testing.T) {
 }
 
 var _ = Describe("Log", func() {
-	Specify("debug test", func() {
+	Specify("log", func() {
 		log := New("sslvpn-agent", WithLogName("sslvpn-agent"), WithLogLevel("debug"), WithTerminal(false), WithWatchEnable(true))
 		Expect(log).ShouldNot(BeNil())
 
