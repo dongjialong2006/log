@@ -171,7 +171,7 @@ func (l *Log) delLogFileByNum(num int, files []os.FileInfo) {
 			name = fmt.Sprintf("./%s/%s", l.path, name)
 		}
 
-		if f.IsDir() || !strings.HasPrefix(f.Name(), l.formt) {
+		if f.IsDir() || !strings.HasPrefix(name, l.formt) {
 			continue
 		}
 
