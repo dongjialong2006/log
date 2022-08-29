@@ -163,9 +163,14 @@ func (l *Log) cutLogFileBySize(num int, basic int64, files []os.FileInfo) {
 
 func (l *Log) delLogFileByNum(num int, files []os.FileInfo) {
 	var logs = make(map[string]string)
+	var name string
 	var timestamps []string = nil
 
 	for _, f := range files {
+		if name = f.Name(); !strings.HasPrefix(f.Name(), fmt.Sprintf("./%s", l.path)) {
+			name = fmt.Sprintf("./%s/%s", l.path, name)
+		}
+
 		if f.IsDir() || !strings.HasPrefix(f.Name(), l.formt) {
 			continue
 		}
