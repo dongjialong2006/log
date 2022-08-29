@@ -128,7 +128,7 @@ func (l *Log) watch(opts ...option) {
 			if err != nil {
 				continue
 			}
-			fmt.Println("dongcf----", len(files))
+
 			l.delLogFileByNum(num, files)
 			l.cutLogFileBySize(num, size, files)
 
