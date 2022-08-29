@@ -117,7 +117,7 @@ func (l *Log) initRemoteLogSystem(opts ...option) error {
 func (l *Log) watch(opts ...option) {
 	num := findWatchLogsByNum(opts...)
 	size := findWatchLogsBySize(opts...)
-fmt.Println(num, "---", size)
+	fmt.Println(num, "---", size)
 	var name string = ""
 	var tick = time.Tick(time.Millisecond * 500)
 
@@ -128,7 +128,7 @@ fmt.Println(num, "---", size)
 			if err != nil {
 				continue
 			}
-fmt.Println("dongcf----", len(files))
+			fmt.Println("dongcf----", len(files))
 			l.delLogFileByNum(num, files)
 			l.cutLogFileBySize(num, size, files)
 
@@ -174,8 +174,9 @@ func (l *Log) delLogFileByNum(num int, files []os.FileInfo) {
 		logs[f.ModTime().String()] = path.Join(l.path, f.Name())
 	}
 
-	
-	for sort.Strings(timestamps),i := 0; i < len(timestamps)-num; i++ {
+	sort.Strings(timestamps)
+
+	for i := 0; i < len(timestamps)-num; i++ {
 		os.Remove(logs[timestamps[i]])
 		l.log.Debugf("remove file:%s.", logs[timestamps[i]])
 	}
