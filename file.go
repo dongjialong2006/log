@@ -117,9 +117,10 @@ func (l *Log) initRemoteLogSystem(opts ...option) error {
 func (l *Log) watch(opts ...option) {
 	num := findWatchLogsByNum(opts...)
 	size := findWatchLogsBySize(opts...)
-
+fmt.Println(num, "---", size)
 	var name string = ""
-	tick := time.Tick(time.Millisecond * 500)
+	var tick = time.Tick(time.Millisecond * 500)
+
 	for {
 		select {
 		case <-tick:
@@ -127,12 +128,11 @@ func (l *Log) watch(opts ...option) {
 			if err != nil {
 				continue
 			}
-
+fmt.Println("dongcf----", len(files))
 			l.delLogFileByNum(num, files)
 			l.cutLogFileBySize(num, size, files)
 
-			name = filepath.Base(l.logFileName())
-			if l.name != name {
+			if name = filepath.Base(l.logFileName()); l.name != name {
 				l.name = name
 				atomic.StoreInt32(&l.index, 0)
 				l.hook.SetDefaultPath(fmt.Sprintf("%s/%s", l.path, l.name))
@@ -174,8 +174,8 @@ func (l *Log) delLogFileByNum(num int, files []os.FileInfo) {
 		logs[f.ModTime().String()] = path.Join(l.path, f.Name())
 	}
 
-	sort.Strings(timestamps)
-	for i := 0; i < len(timestamps)-num; i++ {
+	
+	for sort.Strings(timestamps),i := 0; i < len(timestamps)-num; i++ {
 		os.Remove(logs[timestamps[i]])
 		l.log.Debugf("remove file:%s.", logs[timestamps[i]])
 	}
