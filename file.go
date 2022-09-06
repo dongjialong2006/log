@@ -117,7 +117,7 @@ func (l *Log) initRemoteLogSystem(opts ...option) error {
 func (l *Log) watch(opts ...option) {
 	num := findWatchLogsByNum(opts...)
 	size := findWatchLogsBySize(opts...)
-	fmt.Println(num, "---", size)
+
 	var name string = ""
 	var tick = time.Tick(time.Millisecond * 500)
 
