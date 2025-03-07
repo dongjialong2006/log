@@ -41,7 +41,7 @@ func (l *Log) NewEntry(name string) *Entry {
 
 	if "" == name {
 		e = &Entry{
-			log:    l.log,
+			log:    logrus.NewEntry(l.log),
 			caller: caller,
 		}
 	} else {
