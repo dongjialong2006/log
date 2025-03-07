@@ -37,9 +37,18 @@ type Log struct {
 }
 
 func (l *Log) NewEntry(name string) *Entry {
-	e := &Entry{
-		log:    l.log.WithField("model", name),
-		caller: caller,
+	var e *Entry
+
+	if "" == name {
+		e = &Entry{
+			log:    l.log,
+			caller: caller,
+		}
+	} else {
+		e = &Entry{
+			log:    l.log.WithField("model", name),
+			caller: caller,
+		}
 	}
 
 	for key, field := range fields {
